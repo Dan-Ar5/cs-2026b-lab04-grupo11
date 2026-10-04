@@ -1,7 +1,7 @@
 from diagrams import Diagram, Cluster, Edge
 from diagrams.onprem.client import Users
 from diagrams.onprem.network import Nginx
-from diagrams.programming.framework import Django
+from diagrams.programming.language import Python
 from diagrams.onprem.database import PostgreSQL
 from diagrams.onprem.monitoring import Grafana
 from diagrams.onprem.network import Internet
@@ -16,7 +16,7 @@ with Diagram("EcoRecicla AQP - Vista de despliegue", filename="img/despliegue",
     with Cluster("Servidor en la nube (VPS)"):
         proxy = Nginx("Nginx\n(HTTPS)")
         with Cluster("Monolito modular"):
-            app = Django("API\n(5 módulos)")
+            app = Python("API\n(5 módulos)")
         db = PostgreSQL("PostgreSQL")
         mon = Grafana("Monitoreo")
     usuarios >> movil >> proxy >> app
