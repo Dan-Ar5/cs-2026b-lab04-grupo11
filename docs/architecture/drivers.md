@@ -21,7 +21,7 @@
 | ID   | Tipo        | Restricción                                              |
 |------|-------------|----------------------------------------------------------|
 | R-01 | Plazo       | MVP en producción en 1 mes                               |
-| R-02 | Equipo      | 1 developer con experiencia en Python                    |
+| R-02 | Equipo      | 2 developer con experiencia en Python                    |
 | R-03 | Presupuesto | Bajo: un solo servidor (VPS) o hosting gratuito          |
 | R-04 | Normativa   | Ley 29733 de protección de datos personales              |
 
