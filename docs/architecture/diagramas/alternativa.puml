@@ -1,0 +1,29 @@
+@startuml
+skinparam dpi 150
+skinparam componentStyle rectangle
+skinparam defaultFontName Arial
+skinparam backgroundColor white
+title Alternativa A (descartada): EcoRecicla AQP con monolito en capas
+actor "Usuarios" as U
+node "Servidor (VPS)" {
+  package "Aplicación en capas" {
+    component "Capa de presentación (API REST + PWA)" as P
+    component "Capa de lógica de negocio (recojos, rutas, puntos, distritos, reportes)" as L
+    component "Capa de acceso a datos" as D
+  }
+}
+database "PostgreSQL" as DB
+cloud "WhatsApp / Notificaciones" as W
+U --> P
+P --> L
+L --> D
+D --> DB
+L ..> W
+note bottom of L
+  Puntaje en la matriz: 3,80 (vs 4,10 del monolito modular).
+  Es simple y barata, pero toda la lógica de negocio
+  queda en una sola capa: cambiar una regla de puntos
+  o agregar un distrito puede afectar otros dominios.
+  Penaliza la modificabilidad (2/5), el atributo crítico.
+end note
+@enduml
