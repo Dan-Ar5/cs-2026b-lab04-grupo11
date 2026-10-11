@@ -1,0 +1,133 @@
+@startuml clases-ecorecicla
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classBackgroundColor #EEF2F8
+skinparam classBorderColor #1A3A5C
+title EcoRecicla AQP — Módulos Recojos, Rutas, Puntos y Distritos (diseño)
+skinparam nodesep 25
+skinparam ranksep 40
+
+' Supuesto: TipoMaterial y el estado CANCELADA no vienen de la historia; ver historia.md
+package "recojos" {
+  class Vecino {
+    - id: UUID
+    - nombre: String
+    - celular: String
+    - direccion: String
+  }
+  class Solicitud {
+    - id: UUID
+    - fechaSolicitud: DateTime
+    - distritoId: UUID
+    - direccionRecojo: String
+    - estado: EstadoSolicitud
+    - recicladorId: UUID
+    - pesoKg: Decimal
+    - puntosOtorgados: int
+    + {static} crear(vecinoId: UUID, distritoId: UUID, direccion: String): Solicitud
+    + agregarItem(material: TipoMaterial, pesoEstimadoKg: Decimal): void
+    + asignar(recicladorId: UUID): void
+    + confirmarRecojo(): void
+    + registrarPeso(pesoKg: Decimal): void
+    + acreditarPuntos(puntos: int): void
+    + cancelar(motivo: String): void
+  }
+  class ItemSolicitud {
+    - material: TipoMaterial
+    - pesoEstimadoKg: Decimal
+  }
+  enum EstadoSolicitud {
+    PENDIENTE
+    ASIGNADA
+    RECOGIDA
+    PESADA
+    PUNTOS_ACREDITADOS
+    CANCELADA
+  }
+  enum TipoMaterial {
+    PAPEL
+    CARTON
+    PLASTICO
+    VIDRIO
+    METAL
+  }
+  interface RepositorioSolicitudes <<puerto>> {
+    + buscar(id: UUID): Solicitud
+    + guardar(s: Solicitud): void
+  }
+  interface Notificador <<puerto>> {
+    + notificarSolicitudRegistrada(s: Solicitud): void
+  }
+  class ServicioRecojos <<servicio>> {
+    + solicitarRecojo(vecinoId: UUID, distritoId: UUID, direccion: String, items: List): Solicitud
+    + confirmarRecojo(solicitudId: UUID, pesoKg: Decimal): Solicitud
+  }
+}
+
+package "infraestructura" {
+  class WhatsAppAdapter <<adaptador>>
+}
+
+package "rutas" {
+  class Reciclador {
+    - id: UUID
+    - nombre: String
+    - celular: String
+  }
+  class Ruta {
+    - id: UUID
+    - fecha: Date
+    + agregarParada(s: Solicitud): void
+    + siguienteParada(): Solicitud
+  }
+}
+
+package "puntos" {
+  class CuentaPuntos {
+    - vecinoId: UUID
+    - saldo: int
+    - solicitudesAcreditadas: Set
+    + acreditar(puntos: int, solicitudId: UUID): void
+  }
+  class ReglaPuntos {
+    - distritoId: UUID
+    - puntosPorKg: int
+    - vigenteDesde: Date
+    + calcular(pesoKg: Decimal): int
+  }
+  class ServicioPuntos <<servicio>> {
+    + acreditarPorRecojo(solicitudId: UUID, vecinoId: UUID, distritoId: UUID, pesoKg: Decimal): int
+  }
+}
+
+package "distritos" {
+  class Distrito {
+    - id: UUID
+    - nombre: String
+    - habilitado: bool
+    + habilitar(): void
+    + deshabilitar(): void
+    + estaHabilitado(): bool
+  }
+  class ServicioDistritos <<servicio>> {
+    + estaHabilitado(distritoId: UUID): bool
+  }
+}
+
+Vecino "1" -- "0..*" Solicitud : solicita >
+Solicitud "1" *-- "1..*" ItemSolicitud
+Solicitud --> EstadoSolicitud
+ItemSolicitud --> TipoMaterial
+Reciclador "1" -- "0..*" Ruta : recorre >
+Ruta "1" o-- "0..*" Solicitud : paradas
+Notificador <|.. WhatsAppAdapter
+ServicioRecojos ..> Solicitud
+ServicioRecojos ..> RepositorioSolicitudes
+ServicioRecojos ..> Notificador
+ServicioRecojos ..> ServicioDistritos
+ServicioRecojos ..> ServicioPuntos
+ServicioPuntos ..> CuentaPuntos
+ServicioPuntos ..> ReglaPuntos
+ServicioDistritos ..> Distrito
+@enduml
