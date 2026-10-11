@@ -57,3 +57,31 @@ flowchart TB
 
 ## Reflexión sobre el uso de la IA
 La IA nos ayudó a generar rápido las alternativas de arquitectura, los borradores de los documentos y el código de los diagramas, y a ver riesgos que no habíamos considerado, como la sincronización sin conexión. Pero cometió errores que tuvimos que detectar: la matriz entregó totales que no coincidían con el cálculo de pesos por puntajes, el primer código de PlantUML se dibujó sin ningún texto, y el script de despliegue usaba Django aunque nuestra restricción solo menciona Python. También nos sirvió para comprobar que una recomendación no se acepta sin verificarla. Verificamos en fuentes oficiales que import-linter controla importaciones entre módulos y que la Ley 29733 protege los datos personales. Aprendimos a recalcular a mano, a validar cada diagrama en su editor y a contrastar las propuestas de la IA con nuestras restricciones reales de plazo, equipo y presupuesto.
+
+## Diseño UML (Lab 05)
+Historia crítica: **HU-01, solicitar el recojo de reciclables** ([historia.md](docs/design/historia.md)). Máquina de estados de la `Solicitud`:
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDIENTE : crear()
+    PENDIENTE --> ASIGNADA : asignar() [reciclador de la ruta del distrito]
+    ASIGNADA --> RECOGIDA : confirmarRecojo()
+    RECOGIDA --> PESADA : registrarPeso() [pesoKg > 0]
+    PESADA --> PUNTOS_ACREDITADOS : acreditarPuntos() [no acreditada antes]
+    PENDIENTE --> CANCELADA : cancelar()
+    ASIGNADA --> CANCELADA : cancelar()
+    PUNTOS_ACREDITADOS --> [*]
+    CANCELADA --> [*]
+```
+
+| Entregable | Código fuente | Imagen |
+|---|---|---|
+| E1 Clases | [clases.puml](docs/design/clases.puml) | [PNG](docs/design/img/clases-ecorecicla.png) |
+| E2 Secuencia | [secuencia-solicitar-recojo.puml](docs/design/secuencia-solicitar-recojo.puml) | [PNG](docs/design/img/secuencia-solicitar-recojo.png) |
+| E3 Estados | [estados-solicitud.mmd](docs/design/estados-solicitud.mmd) | [PNG](docs/design/img/estados-solicitud.png) |
+| E4 Actividades | [actividades-ruta-diaria.puml](docs/design/actividades-ruta-diaria.puml) | [PNG](docs/design/img/actividades-ruta-diaria.png) |
+| E5 Paquetes | [paquetes.puml](docs/design/paquetes.puml) | [PNG](docs/design/img/paquetes.png) |
+| E6 Round-trip | [round-trip.md](docs/design/round-trip.md), código en [src/](src/) | [clases](docs/design/img/classes_ecorecicla.png), [paquetes](docs/design/img/packages_ecorecicla.png) |
+| E7 Consistencia e IA | [consistencia.md](docs/design/consistencia.md), [bitacora-ia.md](docs/design/bitacora-ia.md) | — |
+
+Decisión nueva: [ADR-004: referencias entre módulos por identificador](docs/architecture/adr/004-referencias-por-id-entre-modulos.md).

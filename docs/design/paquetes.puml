@@ -1,0 +1,29 @@
+@startuml paquetes
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam packageStyle rectangle
+title EcoRecicla AQP — Paquetes del monolito modular (vista de desarrollo)
+package "ecorecicla (monolito modular, ADR-001)" as APP {
+  package "recojos" as REC
+  package "rutas" as RUT
+  package "puntos" as PUN
+  package "distritos" as DIS
+  package "reportes" as REP
+}
+package "presentación\n(API REST + PWA)" as PRE
+package "infraestructura\n(repositorios y adaptadores)" as INF
+
+RUT ..> REC : usa Solicitud
+REC ..> DIS : usa ServicioDistritos
+REC ..> PUN : usa ServicioPuntos
+REP ..> REC : solo lectura
+REP ..> DIS : solo lectura
+PRE ..> APP : invoca los servicios\nde cada módulo
+INF ..> APP : realiza los puertos\n(Notificador, RepositorioSolicitudes)
+note bottom of PUN
+  Regla (ADR-001): sin dependencias cíclicas.
+  puntos y distritos NO dependen de recojos
+  ni de rutas: las referencias entre módulos
+  se hacen por identificador (UUID).
+end note
+@enduml

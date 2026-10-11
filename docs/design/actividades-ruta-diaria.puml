@@ -1,0 +1,40 @@
+@startuml actividades-ruta-diaria
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam ActivityBackgroundColor #EEF2F8
+skinparam ActivityBorderColor #1A3A5C
+|Sistema|
+start
+:Reúne las solicitudes PENDIENTES\ndel distrito del reciclador;
+if (¿Hay solicitudes pendientes?) then (no)
+  :Informa "sin recojos hoy";
+  |Reciclador|
+  :Revisa el aviso;
+  stop
+else (sí)
+  |Sistema|
+  :Arma la ruta del día\ny asigna las solicitudes;
+endif
+|Reciclador|
+:Consulta su ruta del día;
+repeat
+  :Va a la siguiente parada y recoge;
+  :Pesa los residuos y confirma el recojo;
+  if (¿Hay señal?) then (sí)
+    :Sincroniza de inmediato;
+  else (no)
+    :Guarda el recojo en el celular;
+    :Sincroniza al recuperar señal;
+  endif
+  |Sistema|
+  fork
+    :Acredita los puntos\nal vecino (una sola vez);
+  fork again
+    |Vecino|
+    :Recibe el aviso del recojo\ny sus puntos;
+  end fork
+  |Reciclador|
+repeat while (¿Quedan paradas en la ruta?) is (sí) not (no)
+:Cierra la ruta del día;
+stop
+@enduml
