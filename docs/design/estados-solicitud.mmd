@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> PENDIENTE : crear()
+    PENDIENTE --> ASIGNADA : asignar() [reciclador de la ruta del distrito]
+    ASIGNADA --> RECOGIDA : confirmarRecojo()
+    RECOGIDA --> PESADA : registrarPeso() [pesoKg > 0]
+    PESADA --> PUNTOS_ACREDITADOS : acreditarPuntos() [no acreditada antes]
+    PENDIENTE --> CANCELADA : cancelar()
+    ASIGNADA --> CANCELADA : cancelar()
+    PUNTOS_ACREDITADOS --> [*]
+    CANCELADA --> [*]
+    note right of PUNTOS_ACREDITADOS
+        Al entrar: el saldo del vecino sube
+        una sola vez por solicitud (QA-03)
+    end note

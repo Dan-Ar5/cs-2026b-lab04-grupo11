@@ -1,0 +1,39 @@
+@startuml packages_ecorecicla
+set namespaceSeparator none
+package "distritos" as distritos {
+}
+package "distritos.dominio" as distritos.dominio {
+}
+package "distritos.servicio" as distritos.servicio {
+}
+package "infraestructura" as infraestructura {
+}
+package "infraestructura.whatsapp_adapter" as infraestructura.whatsapp_adapter {
+}
+package "puntos" as puntos {
+}
+package "puntos.dominio" as puntos.dominio {
+}
+package "puntos.servicio" as puntos.servicio {
+}
+package "recojos" as recojos {
+}
+package "recojos.dominio" as recojos.dominio {
+}
+package "recojos.puertos" as recojos.puertos {
+}
+package "recojos.servicio" as recojos.servicio {
+}
+package "rutas" as rutas {
+}
+package "rutas.dominio" as rutas.dominio {
+}
+infraestructura.whatsapp_adapter --> recojos.dominio
+infraestructura.whatsapp_adapter --> recojos.puertos
+recojos.puertos --> recojos.dominio
+recojos.servicio --> distritos.servicio
+recojos.servicio --> puntos.servicio
+recojos.servicio --> recojos.dominio
+recojos.servicio --> recojos.puertos
+rutas.dominio --> recojos.dominio
+@enduml

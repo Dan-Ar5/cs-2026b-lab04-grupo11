@@ -1,0 +1,99 @@
+@startuml classes_ecorecicla
+set namespaceSeparator none
+class "CuentaPuntos" as puntos.dominio.CuentaPuntos {
+  saldo : int
+  solicitudes_acreditadas : set[UUID]
+  vecino_id : UUID
+  acreditar(puntos: int, solicitud_id: UUID) -> None
+}
+class "Distrito" as distritos.dominio.Distrito {
+  habilitado : bool
+  id : UUID
+  nombre : str
+  deshabilitar() -> None
+  esta_habilitado() -> bool
+  habilitar() -> None
+}
+class "<color:red>DistritoNoHabilitado</color>" as recojos.servicio.DistritoNoHabilitado {
+}
+class "EstadoSolicitud" as recojos.dominio.EstadoSolicitud {
+  name
+}
+class "ItemSolicitud" as recojos.dominio.ItemSolicitud {
+  material
+  peso_estimado_kg
+}
+class "Notificador" as recojos.puertos.Notificador {
+  {abstract}notificar_solicitud_registrada(s: Solicitud) -> None
+}
+class "Reciclador" as rutas.dominio.Reciclador {
+  celular : str
+  id : UUID
+  nombre : str
+}
+class "ReglaPuntos" as puntos.dominio.ReglaPuntos {
+  distrito_id : UUID
+  puntos_por_kg : int
+  vigente_desde : date
+  calcular(peso_kg: Decimal) -> int
+}
+class "RepositorioSolicitudes" as recojos.puertos.RepositorioSolicitudes {
+  {abstract}buscar(id: UUID) -> Solicitud
+  {abstract}guardar(s: Solicitud) -> None
+}
+class "Ruta" as rutas.dominio.Ruta {
+  fecha : date
+  id : UUID
+  paradas : list[Solicitud]
+  reciclador
+  agregar_parada(s: Solicitud) -> None
+  siguiente_parada() -> Solicitud
+}
+class "ServicioDistritos" as distritos.servicio.ServicioDistritos {
+  {abstract}esta_habilitado(distrito_id: UUID) -> bool
+}
+class "ServicioPuntos" as puntos.servicio.ServicioPuntos {
+  {abstract}acreditar_por_recojo(solicitud_id: UUID, vecino_id: UUID, distrito_id: UUID, peso_kg: Decimal) -> int
+}
+class "ServicioRecojos" as recojos.servicio.ServicioRecojos {
+  confirmar_recojo(solicitud_id: UUID, peso_kg: Decimal) -> Solicitud
+  solicitar_recojo(vecino_id: UUID, distrito_id: UUID, direccion: str, items: list[ItemSolicitud]) -> Solicitud
+}
+class "Solicitud" as recojos.dominio.Solicitud {
+  direccion_recojo : str
+  distrito_id : UUID
+  estado
+  fecha_solicitud : datetime
+  id : UUID
+  items : list[ItemSolicitud]
+  peso_kg : Decimal | None
+  puntos_otorgados : int | None
+  reciclador_id : UUID | None
+  vecino_id : UUID
+  acreditar_puntos(puntos: int) -> None
+  agregar_item(material: TipoMaterial, peso_estimado_kg: Decimal) -> None
+  asignar(reciclador_id: UUID) -> None
+  cancelar(motivo: str) -> None
+  confirmar_recojo() -> None
+  crear(vecino_id: UUID, distrito_id: UUID, direccion: str) -> Solicitud
+  registrar_peso(peso_kg: Decimal) -> None
+}
+class "TipoMaterial" as recojos.dominio.TipoMaterial {
+  name
+}
+class "<color:red>TransicionInvalida</color>" as recojos.dominio.TransicionInvalida {
+}
+class "Vecino" as recojos.dominio.Vecino {
+  celular : str
+  direccion : str
+  id : UUID
+  nombre : str
+}
+class "WhatsAppAdapter" as infraestructura.whatsapp_adapter.WhatsAppAdapter {
+  {abstract}notificar_solicitud_registrada(s: Solicitud) -> None
+}
+infraestructura.whatsapp_adapter.WhatsAppAdapter --|> recojos.puertos.Notificador
+recojos.dominio.Solicitud --> recojos.dominio.EstadoSolicitud : estado
+recojos.dominio.ItemSolicitud --> recojos.dominio.TipoMaterial : material
+rutas.dominio.Ruta --> rutas.dominio.Reciclador : reciclador
+@enduml
