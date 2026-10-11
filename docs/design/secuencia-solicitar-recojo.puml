@@ -1,0 +1,37 @@
+@startuml secuencia-solicitar-recojo
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam sequenceMessageAlign center
+autonumber
+actor Vecino
+participant "PWA" as UI
+participant "SolicitudController" as C
+participant "ServicioRecojos" as S
+participant "ServicioDistritos" as SD
+participant "Solicitud" as SO
+participant "RepositorioSolicitudes" as R
+participant "Notificador\n(WhatsAppAdapter)" as N
+
+Vecino -> UI : Solicitar recojo (materiales y dirección)
+UI -> C : POST /solicitudes
+C -> S : solicitarRecojo(vecinoId, distritoId, direccion, items)
+S -> SD : estaHabilitado(distritoId)
+SD --> S : habilitado
+alt distrito habilitado
+  S -> SO : crear(vecinoId, distritoId, direccion)
+  SO --> S : solicitud PENDIENTE
+  loop por cada material
+    S -> SO : agregarItem(material, pesoEstimadoKg)
+  end
+  S -> R : guardar(solicitud)
+  R --> S : ok
+  S ->> N : notificarSolicitudRegistrada(solicitud)
+  note right of N : asíncrono\n(no bloquea la respuesta)
+  S --> C : solicitud PENDIENTE
+  C --> UI : 201 Creada
+else distrito no habilitado
+  S --> C : rechazo (distrito no habilitado)
+  C --> UI : 422 Distrito no habilitado
+end
+UI --> Vecino : Muestra el resultado
+@enduml
